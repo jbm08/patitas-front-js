@@ -60,5 +60,54 @@ async function cerrarSesion(email, msg) {
         console.error('Error: Problema en el servicio', error)
         mostrarAlerta('Error: Problema en el servicio', msg)
     }
+
+    async function cerrarSesionEF(tipoDocumento, numeroDocumento, msg) {
+        mostrarAlerta("Cerrando sesión...", msg);
+        const url = 'http://localhost:8082/login/logout_ef';
+    
+        const data = {
+            tipoDocumento,
+            numeroDocumento
+        };
+    
+        try {
+            const response = await realizarPeticion(url, data);
+            manejarRespuesta(response, msg);
+        } catch (error) {
+            console.error('Error: Problema en el servicio', error);
+            mostrarAlerta('Error: Problema en el servicio', msg);
+        }
+    }
+    
+    async function realizarPeticion(url, data) {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+    
+        if (!response.ok) {
+            mostrarAlerta('Error: Problema al cerrar sesión de usuario');
+            throw new Error(`Error: ${response.statusText}`);
+        }
+    
+        return response.json();
+    }
+    
+    function manejarRespuesta(result, msg) {
+        console.log('Respuesta del servidor', result);
+    
+        if (result.codigo === '00') {
+            localStorage.removeItem('result');
+            localStorage.removeItem('tipodocumento');
+            localStorage.removeItem('numerodocumento');
+            window.location.replace('index.html');
+        } else {
+            console.error('Error: Problema en el servidor');
+            mostrarAlerta("Error: Problema en el servidor", msg);
+        }
+    }
 }
 
